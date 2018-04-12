@@ -28,10 +28,9 @@ public class GameFragment extends Fragment {
     private final int TONE_INTERVAL = 2000; //interval between each tone
     private static final Random RANDOM = new Random();
 
-    private enum Color {BLUE, RED, YELLOW, GREEN};
+    private enum Color {BLUE, RED, YELLOW, GREEN}
     private Color[] colors = Color.values();
     private enum GamePhase {PLAYER, CPU};
-    private GamePhase mCurrentPhase;
 
     private ArrayList<Color> mToneSequence;
     private int mCurrentToneIndex = 0;
