@@ -28,12 +28,7 @@ public class GameFragment extends Fragment {
     private final int TONE_INTERVAL = 2000; //interval between each tone
     private static final Random RANDOM = new Random();
 
-    private enum Color {BLUE, RED, YELLOW, GREEN}
-    private Color[] colors = Color.values();
-    private enum GamePhase {PLAYER, CPU};
-
-    private ArrayList<Color> mToneSequence;
-    private int mCurrentToneIndex = 0;
+    ToneSequence mToneSequence;
 
     private int mScore;
 
@@ -59,9 +54,10 @@ public class GameFragment extends Fragment {
 
         View v  = inflater.inflate(R.layout.fragment_game, container, false);
 
+        mToneSequence = new ToneSequence();
+
         getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        mToneSequence = new ArrayList<>();
         mScoreView = v.findViewById(R.id.score);
         mMessageView = v.findViewById(R.id.message);
 
@@ -71,7 +67,7 @@ public class GameFragment extends Fragment {
         mGreenButton = v.findViewById(R.id.green_button);
         mStartGameButton = v.findViewById(R.id.start_button);
 
-        setGamePhase(GamePhase.CPU);
+        enableButtons(false);
 
         mBlueNote = MediaPlayer.create(getActivity(), R.raw.blue_long);
         mBlueNote.setVolume(0.05f, 0.05f);
@@ -114,7 +110,7 @@ public class GameFragment extends Fragment {
         mBlueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playTone(mBlueButton, mBlueNote, "blue", GamePhase.PLAYER);
+                playTone(mBlueButton, mBlueNote, "blue", true);
                 checkCorrectInput(Color.BLUE);
             }
         });
@@ -122,7 +118,7 @@ public class GameFragment extends Fragment {
         mRedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playTone(mRedButton, mRedNote, "red", GamePhase.PLAYER);
+                playTone(mRedButton, mRedNote, "red", true);
                 checkCorrectInput(Color.RED);
             }
         });
@@ -130,7 +126,7 @@ public class GameFragment extends Fragment {
         mYellowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playTone(mYellowButton, mYellowNote, "yellow", GamePhase.PLAYER);
+                playTone(mYellowButton, mYellowNote, "yellow", true);
                 checkCorrectInput(Color.YELLOW);
             }
         });
@@ -138,7 +134,7 @@ public class GameFragment extends Fragment {
         mGreenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playTone(mGreenButton, mGreenNote, "green", GamePhase.PLAYER);
+                playTone(mGreenButton, mGreenNote, "green", true);
                 checkCorrectInput(Color.GREEN);
             }
         });
@@ -147,11 +143,11 @@ public class GameFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //Wait some time, then play tone sequence for player
-                setGamePhase(GamePhase.CPU);
+                enableButtons(false);
 
                 mMessageView.setText("");
                 setScore(0);
-                mCurrentToneIndex = 0;
+                mToneSequence.resetToneIndex();
                 mToneSequence.clear();
 
                 new Handler().postDelayed(new Runnable(){public void run() { computerPlayToneSequence();}}, TONE_INTERVAL);
@@ -162,11 +158,11 @@ public class GameFragment extends Fragment {
     }
 
     private void playTone(final Button button, final MediaPlayer note,
-                          final String text, final GamePhase phase) {
+                          final String text, final boolean isPlayerTurn) {
 
-        final Boolean isLastInSequence = (mCurrentToneIndex == (mToneSequence.size() - 1));
+        final Boolean isLastInSequence = (mToneSequence.getCurrentToneIndex() == (mToneSequence.getSize() - 1));
         button.setText("Beep");
-        setGamePhase(GamePhase.CPU);
+        enableButtons(false);
         //play for tone for its duration
         note.start();
         new Handler().postDelayed(new Runnable() {
@@ -175,11 +171,11 @@ public class GameFragment extends Fragment {
                     note.stop();
                     note.prepare();
                     button.setText(text);
-                    if (phase == GamePhase.PLAYER) {
+                    if (isPlayerTurn) {
                         if (isLastInSequence)
-                            setGamePhase(GamePhase.CPU);
+                            enableButtons(false);
                         else
-                            setGamePhase(GamePhase.PLAYER);
+                            enableButtons(true);
                     }
                 }
                 catch(IOException e){
@@ -193,16 +189,16 @@ public class GameFragment extends Fragment {
     private void computerPlayTone(Color color) {
         switch (color) {
             case BLUE:
-                playTone(mBlueButton, mBlueNote, color.toString(), GamePhase.CPU);
+                playTone(mBlueButton, mBlueNote, color.toString(), false);
                 break;
             case RED:
-                playTone(mRedButton, mRedNote, color.toString(), GamePhase.CPU);
+                playTone(mRedButton, mRedNote, color.toString(), false);
                 break;
             case YELLOW:
-                playTone(mYellowButton, mYellowNote, color.toString(), GamePhase.CPU);
+                playTone(mYellowButton, mYellowNote, color.toString(), false);
                 break;
             case GREEN:
-                playTone(mGreenButton, mGreenNote, color.toString(), GamePhase.CPU);
+                playTone(mGreenButton, mGreenNote, color.toString(), false);
                 break;
             default:
         }
@@ -212,15 +208,14 @@ public class GameFragment extends Fragment {
     // player to input the tones.
     private void computerPlayToneSequence() {
         //add a new tone to sequence
+         Color[] colors = Color.values();
         Color next = colors[RANDOM.nextInt(colors.length)];
-        mToneSequence.add(next);
+        mToneSequence.addTone(next);
 
         new CountDownTimer(30000, TONE_LENGTH + TONE_INTERVAL) {
-            private int index = 0;
             public void onTick(long millisUntilFinished) {
-                if (index < mToneSequence.size()) {
-                    computerPlayTone(mToneSequence.get(index));
-                    index++;
+                if (mToneSequence.getCurrentToneIndex() < mToneSequence.getSize()) {
+                    computerPlayTone(mToneSequence.getNextTone());
                 }
                 else {
                     this.cancel();
@@ -229,12 +224,12 @@ public class GameFragment extends Fragment {
             }
 
             public void onFinish() {
-                if (index < (mToneSequence.size())) {
+                if (mToneSequence.getCurrentToneIndex() < mToneSequence.getSize()) {
                     this.start();
                 }
                 else {
-                    setGamePhase(GamePhase.PLAYER);
-                    //something
+                    mToneSequence.resetToneIndex();
+                    enableButtons(true);
                 }
             }
         }.start();
@@ -243,46 +238,38 @@ public class GameFragment extends Fragment {
     // Sets the phase of the game. There are two phases:
     // 1. The computer (CPU) plays tones for the player to memorize. Player input disabled.
     // 2. The player inputs the tones
-    private void setGamePhase(GamePhase phase) {
-        switch (phase) {
-            case CPU:
-                mBlueButton.setEnabled(false);
-                mRedButton.setEnabled(false);
-                mYellowButton.setEnabled(false);
-                mGreenButton.setEnabled(false);
-                break;
-            case PLAYER:
-                mBlueButton.setEnabled(true);
-                mRedButton.setEnabled(true);
-                mYellowButton.setEnabled(true);
-                mGreenButton.setEnabled(true);
-                break;
-            default:
+    private void enableButtons(boolean isEnabled) {
+        if (!isEnabled) {
+            mBlueButton.setEnabled(false);
+            mRedButton.setEnabled(false);
+            mYellowButton.setEnabled(false);
+            mGreenButton.setEnabled(false);
+        } else {
+            mBlueButton.setEnabled(true);
+            mRedButton.setEnabled(true);
+            mYellowButton.setEnabled(true);
+            mGreenButton.setEnabled(true);
         }
     }
 
     private void checkCorrectInput(Color color) {
         //is the inputted tone correct?
-        //mInputSequence.add(color);
-        if (color == mToneSequence.get(mCurrentToneIndex)) {
-            mCurrentToneIndex++;
-        }
-        else {
+        if (color != mToneSequence.getNextTone()) {
             //player chose wrong. Wait for selected tone to finish, then play lose sound.
             new Handler().postDelayed(new Runnable() { public void run() {mLoseSound.start();}}, TONE_LENGTH);
             mToneSequence.clear();
-            mCurrentToneIndex = 0;
+            mToneSequence.resetToneIndex();
             mMessageView.setText("Too bad. Better luck next time.");
             return;
         }
         //has the player won the round?
-        if (mCurrentToneIndex == mToneSequence.size()) {
+        if (mToneSequence.getCurrentToneIndex() == mToneSequence.getSize()) {
             //player inputted sequence correctly. Wait for selected tone to finish, then play victory sound.
             new Handler().postDelayed(new Runnable() { public void run() {mVictorySound.start();}}, TONE_LENGTH);
-            setGamePhase(GamePhase.CPU);
-            mCurrentToneIndex = 0;
+            enableButtons(false);
+            mToneSequence.resetToneIndex();
             //play victory sound
-            setScore(mToneSequence.size());
+            setScore(mToneSequence.getSize());
             //Wait some time, then play new tone sequence for player
             new Handler().postDelayed(new Runnable() { public void run() { computerPlayToneSequence();}}, TONE_INTERVAL + TONE_LENGTH);
         }
