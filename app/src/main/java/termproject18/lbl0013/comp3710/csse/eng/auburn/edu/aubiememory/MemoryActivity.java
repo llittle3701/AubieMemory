@@ -6,6 +6,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,9 +21,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static java.lang.Thread.sleep;
 
-public class MemoryActivity extends AppCompatActivity {
+public class MemoryActivity extends AppCompatActivity implements MainFragment.MainMenuButtonListener {
 
-    private Fragment fragment_game;
+    private Fragment fragment_main;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,13 +31,49 @@ public class MemoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_memory);
 
         FragmentManager fm = getSupportFragmentManager();
-        fragment_game = fm.findFragmentById(R.id.fragment_container);
+        fragment_main = fm.findFragmentById(R.id.fragment_container);
 
-        if (fragment_game == null) {
-            fragment_game = new GameFragment();
-            fm.beginTransaction().add(R.id.fragment_container, fragment_game).commit();
+        if (fragment_main == null) {
+            fragment_main = new MainFragment();
+            fm.beginTransaction().add(R.id.fragment_container, fragment_main).commit();
         }
-
     }
 
+    @Override
+    public void onBeginnerButtonPressed(Bundle bundle) {
+        GameFragment gameFragment = new GameFragment();
+        gameFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, gameFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    public void onIntermediateButtonPressed(Bundle bundle) {
+        GameFragment gameFragment = new GameFragment();
+        gameFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, gameFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    public void onExpertButtonPressed(Bundle bundle) {
+        GameFragment gameFragment = new GameFragment();
+        gameFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, gameFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    public void onScoreButtonPressed(Bundle bundle) {
+
+    }
 }
