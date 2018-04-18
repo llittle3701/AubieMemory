@@ -24,18 +24,19 @@ import static java.lang.Thread.sleep;
 public class MemoryActivity extends AppCompatActivity implements MainFragment.MainMenuButtonListener {
 
     private Fragment fragment_main;
+    private FragmentManager mFragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memory);
 
-        FragmentManager fm = getSupportFragmentManager();
-        fragment_main = fm.findFragmentById(R.id.fragment_container);
+        mFragmentManager = getSupportFragmentManager();
+        fragment_main = mFragmentManager.findFragmentById(R.id.fragment_container);
 
         if (fragment_main == null) {
             fragment_main = new MainFragment();
-            fm.beginTransaction().add(R.id.fragment_container, fragment_main).commit();
+            mFragmentManager.beginTransaction().add(R.id.fragment_container, fragment_main).commit();
         }
     }
 
@@ -75,5 +76,12 @@ public class MemoryActivity extends AppCompatActivity implements MainFragment.Ma
     @Override
     public void onScoreButtonPressed(Bundle bundle) {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mFragmentManager.getBackStackEntryCount() > 0)
+            mFragmentManager.popBackStackImmediate();
+        else super.onBackPressed();
     }
 }

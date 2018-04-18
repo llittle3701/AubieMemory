@@ -8,27 +8,12 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Random;
 
 public class GameFragment extends Fragment {
 
@@ -36,12 +21,15 @@ public class GameFragment extends Fragment {
     private final String DEBUG_TAG = "debug";
 
     public enum Difficulty {BEGINNER, INTERMEDIATE, EXPERT}
+    private String mCurrentDifficulty = "";
 
     private int TONE_LENGTH = 1000; //tone length in milliseconds
     private int TONE_INTERVAL = 2000; //interval between each tone
-    private static final Random RANDOM = new Random();
 
+    //Helper classes
     ToneSequence mToneSequence;
+    HighScoreManager mHighScoreManager;
+    CountDownTimer mCountDownTimer;
 
     private int mScore;
     private String scoreFile = "high_score.xml";
@@ -70,15 +58,15 @@ public class GameFragment extends Fragment {
         View v  = inflater.inflate(R.layout.fragment_game, container, false);
 
         mToneSequence = new ToneSequence();
+        Context context = getContext();
+        if (context != null)
+            mHighScoreManager = new HighScoreManager(context);
 
         getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         mScoreView = v.findViewById(R.id.score);
         mHighScoreView = v.findViewById(R.id.highscore);
         mMessageView = v.findViewById(R.id.message);
-
-        String highScore = getHighScore().toString();
-        mHighScoreView.setText(highScore);
 
         mBlueButton = v.findViewById(R.id.blue_button);
         mRedButton =  v.findViewById(R.id.red_button);
@@ -88,6 +76,9 @@ public class GameFragment extends Fragment {
 
         enableButtons(false);
         setDifficulty(getArguments());
+
+        String highScore = mHighScoreManager.getHighScore(context, mCurrentDifficulty).toString();
+        mHighScoreView.setText(highScore);
 
         mBlueNote = MediaPlayer.create(getActivity(), R.raw.blue_long);
         mBlueNote.setVolume(0.05f, 0.05f);
@@ -184,13 +175,16 @@ public class GameFragment extends Fragment {
         Difficulty difficulty = (Difficulty) bundle.get("Difficulty");
         switch (difficulty) {
             case BEGINNER:
-                TONE_INTERVAL = 1000;
+                TONE_INTERVAL = 750;
+                mCurrentDifficulty = Difficulty.BEGINNER.name();
                 break;
             case INTERMEDIATE:
-                TONE_INTERVAL = 200;
+                TONE_INTERVAL = 500;
+                mCurrentDifficulty = Difficulty.INTERMEDIATE.name();
                 break;
             case EXPERT:
                 TONE_INTERVAL = 50;
+                mCurrentDifficulty = Difficulty.EXPERT.name();
                 break;
             default:
         }
@@ -199,7 +193,7 @@ public class GameFragment extends Fragment {
     private void playTone(final Button button, final MediaPlayer note,
                           final String text, final boolean isPlayerTurn) {
 
-        final Boolean isLastInSequence = (mToneSequence.getCurrentToneIndex() == (mToneSequence.getSize() - 1));
+        final Boolean isLastInSequence = mToneSequence.isToneLastInSequence();
         button.setText("Beep");
         enableButtons(false);
         //play for tone for its duration
@@ -247,13 +241,11 @@ public class GameFragment extends Fragment {
     // player to input the tones.
     private void computerPlayToneSequence() {
         //add a new tone to sequence
-         Color[] colors = Color.values();
-        Color next = colors[RANDOM.nextInt(colors.length)];
-        mToneSequence.addTone(next);
+        mToneSequence.addRandomTone();
 
-        new CountDownTimer(30000, TONE_LENGTH + TONE_INTERVAL) {
+        mCountDownTimer = new CountDownTimer(30000, TONE_LENGTH + TONE_INTERVAL) {
             public void onTick(long millisUntilFinished) {
-                if (mToneSequence.getCurrentToneIndex() < mToneSequence.getSize()) {
+                if (!mToneSequence.isSequenceFinished()) {
                     computerPlayTone(mToneSequence.getNextTone());
                 }
                 else {
@@ -263,7 +255,7 @@ public class GameFragment extends Fragment {
             }
 
             public void onFinish() {
-                if (mToneSequence.getCurrentToneIndex() < mToneSequence.getSize()) {
+                if (!mToneSequence.isSequenceFinished()) {
                     this.start();
                 }
                 else {
@@ -293,25 +285,24 @@ public class GameFragment extends Fragment {
 
     private void checkCorrectInput(Color color) {
         //is the inputted tone correct?
-        if (color != mToneSequence.getNextTone()) {
+        if (!mToneSequence.isInputCorrect(color)) {
             //player chose wrong. Wait for selected tone to finish, then play lose sound.
             new Handler().postDelayed(new Runnable() { public void run() {mLoseSound.start();}}, TONE_LENGTH);
-            mToneSequence.clear();
-            mToneSequence.resetToneIndex();
             mMessageView.setText("Too bad. Better luck next time.");
+            //Display 'play again' button
             mStartGameButton.setVisibility(View.VISIBLE);
             return;
         }
         //has the player won the round?
-        if (mToneSequence.getCurrentToneIndex() == mToneSequence.getSize()) {
+        if (mToneSequence.isSequenceFinished()) {
             //player inputted sequence correctly. Wait for selected tone to finish, then play victory sound.
             new Handler().postDelayed(new Runnable() { public void run() {mVictorySound.start();}}, TONE_LENGTH);
             enableButtons(false);
             mToneSequence.resetToneIndex();
 
             setScore(mToneSequence.getSize());
-            if (mScore > getHighScore()) {
-                setHighScore(mScore);
+            if (mScore > mHighScoreManager.getHighScore(getContext(), mCurrentDifficulty)) {
+                mHighScoreManager.setHighScore(getContext(), mCurrentDifficulty, mScore);
                 String currentScore = ((Integer) mScore).toString();
                 mHighScoreView.setText(currentScore);
             }
@@ -326,114 +317,18 @@ public class GameFragment extends Fragment {
         mScoreView.setText(currentScore);
     }
 
-    private Integer getHighScore() {
-        String rawXML = "";
-        ArrayList<String> data = new ArrayList<>();
-        try {
-            FileInputStream fis = getContext().openFileInput(scoreFile);
-            InputStreamReader isr = new InputStreamReader(fis);
-            char[] inputBuffer = new char[fis.available()];
-            isr.read(inputBuffer);
-            rawXML = new String(inputBuffer);
-            isr.close();
-            fis.close();
-        }
-        catch (FileNotFoundException e) {
-            Log.e(ERROR_TAG, "FileNotFoundException in getHighScore : \n" + e.getMessage());
-            return 0;
-        }
-        catch (IOException e) {
-            Log.e(ERROR_TAG, "IOException in getHighScore: \n" + e.getMessage());
-        }
-        XmlPullParserFactory factory = null;
-        try {
-            factory = XmlPullParserFactory.newInstance();
-        }
-        catch (XmlPullParserException e) {
-            Log.e(ERROR_TAG, "XmlPullParserException in getHighScore: \n" + e.getMessage());
-        }
 
-        factory.setNamespaceAware(true);
-        XmlPullParser xpp = null;
-        try {
-            xpp = factory.newPullParser();
-        }
-        catch (XmlPullParserException e) {
-            Log.e(ERROR_TAG, "XmlPullParserException in getHighScore: \n" + e.getMessage());
-        }
-
-        try {
-            xpp.setInput(new StringReader(rawXML));
-        }
-        catch(XmlPullParserException e) {
-            Log.e(ERROR_TAG, "XmlPullParserException in getHighScore: \n" + e.getMessage());
-        }
-
-        int eventType = 0;
-        try {
-            eventType = xpp.getEventType();
-        }
-        catch (XmlPullParserException e) {
-            Log.e(ERROR_TAG, "XmlPullParserException in getHighScore: \n" + e.getMessage());
-        }
-
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            if (eventType == XmlPullParser.START_DOCUMENT) {
-                Log.d(DEBUG_TAG, "Start document");
-            }
-            else if (eventType == XmlPullParser.START_TAG) {
-                Log.d(DEBUG_TAG, "Start tag: " + xpp.getName());
-            }
-            else if (eventType == XmlPullParser.END_TAG) {
-                Log.d(DEBUG_TAG, "End tag: " + xpp.getName());
-            }
-            else if (eventType == XmlPullParser.TEXT) {
-                data.add(xpp.getText());
-            }
-            try {
-                eventType = xpp.next();
-            }
-            catch (XmlPullParserException e) {
-                Log.e(ERROR_TAG, "XmlPullParserException in getHighScore: \n" + e.getMessage());
-            }
-            catch (IOException e) {
-                Log.e(ERROR_TAG, "IOException in getHighScore: \n" + e.getMessage());
-            }
-        }
-
-        String highScore = data.get(0);
-        return Integer.parseInt(highScore);
-    }
-
-    private void setHighScore(Integer score) {
-        try{
-            FileOutputStream fos = getContext().openFileOutput(scoreFile, Context.MODE_PRIVATE);
-            XmlSerializer xmlSerializer = Xml.newSerializer();
-            StringWriter writer = new StringWriter();
-            xmlSerializer.setOutput(writer);
-            xmlSerializer.startDocument("UTF-8", true);
-            xmlSerializer.startTag(null, "data");
-            xmlSerializer.startTag(null, "highScore");
-            xmlSerializer.text(score.toString());
-            xmlSerializer.endTag(null, "highScore");
-            xmlSerializer.endTag(null, "data");
-            xmlSerializer.endDocument();
-            xmlSerializer.flush();
-            String dataWrite = writer.toString();
-            fos.write(dataWrite.getBytes());
-            fos.close();
-        }
-        catch (FileNotFoundException e) {
-            Log.e(ERROR_TAG, "FileNotFoundException in setHighScore : \n" + e.getMessage());
-        }
-        catch (IllegalArgumentException e) {
-            Log.e(ERROR_TAG, "IllegalArgumentException in setHighScore : \n" + e.getMessage());
-        }
-        catch (IllegalStateException e) {
-            Log.e(ERROR_TAG, "IllegalStateException in setHighScore : \n" + e.getMessage());
-        }
-        catch (IOException e) {
-            Log.e(ERROR_TAG, "IOException in setHighScore : \n" + e.getMessage());
-        }
+    @Override
+    public void onDestroy() {
+        mCountDownTimer.cancel();
+        mBlueNote.stop();
+        mRedNote.stop();
+        mYellowNote.stop();
+        mGreenNote.stop();
+        mBlueNote.release();
+        mRedNote.release();
+        mYellowNote.release();
+        mGreenNote.release();
+        super.onDestroy();
     }
 }
