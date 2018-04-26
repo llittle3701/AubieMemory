@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import java.io.IOException;
 
@@ -34,10 +35,10 @@ public class GameFragment extends Fragment {
     private int mScore;
     private String scoreFile = "high_score.xml";
 
-    private Button mBlueButton;
-    private Button mRedButton;
-    private Button mYellowButton;
-    private Button mGreenButton;
+    private ImageButton mBlueButton;
+    private ImageButton mRedButton;
+    private ImageButton mYellowButton;
+    private ImageButton mGreenButton;
     private Button mStartGameButton;
 
     private MediaPlayer mBlueNote;
@@ -121,7 +122,7 @@ public class GameFragment extends Fragment {
         mBlueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playTone(mBlueButton, mBlueNote, "blue", true);
+                playTone(mBlueButton, mBlueNote,true);
                 checkCorrectInput(Color.BLUE);
             }
         });
@@ -129,7 +130,7 @@ public class GameFragment extends Fragment {
         mRedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playTone(mRedButton, mRedNote, "red", true);
+                playTone(mRedButton, mRedNote,true);
                 checkCorrectInput(Color.RED);
             }
         });
@@ -137,7 +138,7 @@ public class GameFragment extends Fragment {
         mYellowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playTone(mYellowButton, mYellowNote, "yellow", true);
+                playTone(mYellowButton, mYellowNote,true);
                 checkCorrectInput(Color.YELLOW);
             }
         });
@@ -145,7 +146,7 @@ public class GameFragment extends Fragment {
         mGreenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playTone(mGreenButton, mGreenNote, "green", true);
+                playTone(mGreenButton, mGreenNote,true);
                 checkCorrectInput(Color.GREEN);
             }
         });
@@ -175,7 +176,7 @@ public class GameFragment extends Fragment {
         Difficulty difficulty = (Difficulty) bundle.get("Difficulty");
         switch (difficulty) {
             case BEGINNER:
-                TONE_INTERVAL = 750;
+                TONE_INTERVAL = 1000;
                 mCurrentDifficulty = Difficulty.BEGINNER.name();
                 break;
             case INTERMEDIATE:
@@ -190,11 +191,10 @@ public class GameFragment extends Fragment {
         }
     }
 
-    private void playTone(final Button button, final MediaPlayer note,
-                          final String text, final boolean isPlayerTurn) {
-
+    private void playTone(final ImageButton button, final MediaPlayer note,
+                            final boolean isPlayerTurn) {
         final Boolean isLastInSequence = mToneSequence.isToneLastInSequence();
-        button.setText("Beep");
+        setSelected(button);
         enableButtons(false);
         //play for tone for its duration
         note.start();
@@ -203,7 +203,7 @@ public class GameFragment extends Fragment {
                 try {
                     note.stop();
                     note.prepare();
-                    button.setText(text);
+                    unselect(button);
                     if (isPlayerTurn) {
                         if (isLastInSequence)
                             enableButtons(false);
@@ -219,19 +219,41 @@ public class GameFragment extends Fragment {
     }
 
 
+    private void setSelected(ImageButton button) {
+        if (button == mBlueButton)
+            mBlueButton.setBackgroundResource(R.drawable.blue_aubie_tl);
+        else if (button == mRedButton)
+            mRedButton.setBackgroundResource(R.drawable.red_aubie_tr);
+        else if (button == mYellowButton)
+            mYellowButton.setBackgroundResource(R.drawable.yellow_aubie_bl);
+        else if (button == mGreenButton)
+            mGreenButton.setBackgroundResource(R.drawable.green_aubie_br);
+    }
+
+    private void unselect(ImageButton button) {
+        if (button == mBlueButton)
+            mBlueButton.setBackgroundResource(R.drawable.blue_tl);
+        else if (button == mRedButton)
+            mRedButton.setBackgroundResource(R.drawable.red_tr);
+        else if (button == mYellowButton)
+            mYellowButton.setBackgroundResource(R.drawable.yellow_bl);
+        else if (button == mGreenButton)
+            mGreenButton.setBackgroundResource(R.drawable.green_br);
+    }
+
     private void computerPlayTone(Color color) {
         switch (color) {
             case BLUE:
-                playTone(mBlueButton, mBlueNote, color.toString(), false);
+                playTone(mBlueButton, mBlueNote, false);
                 break;
             case RED:
-                playTone(mRedButton, mRedNote, color.toString(), false);
+                playTone(mRedButton, mRedNote,false);
                 break;
             case YELLOW:
-                playTone(mYellowButton, mYellowNote, color.toString(), false);
+                playTone(mYellowButton, mYellowNote, false);
                 break;
             case GREEN:
-                playTone(mGreenButton, mGreenNote, color.toString(), false);
+                playTone(mGreenButton, mGreenNote, false);
                 break;
             default:
         }
@@ -288,7 +310,7 @@ public class GameFragment extends Fragment {
         if (!mToneSequence.isInputCorrect(color)) {
             //player chose wrong. Wait for selected tone to finish, then play lose sound.
             new Handler().postDelayed(new Runnable() { public void run() {mLoseSound.start();}}, TONE_LENGTH);
-            mMessageView.setText("Too bad. Better luck next time.");
+            mMessageView.setText(R.string.too_bad);
             //Display 'play again' button
             mStartGameButton.setVisibility(View.VISIBLE);
             return;
