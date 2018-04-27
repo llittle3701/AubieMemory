@@ -221,13 +221,13 @@ public class GameFragment extends Fragment {
 
     private void setSelected(ImageButton button) {
         if (button == mBlueButton)
-            mBlueButton.setBackgroundResource(R.drawable.blue_aubie_tl);
+            mBlueButton.setBackgroundResource(R.drawable.blueaubie_tl);
         else if (button == mRedButton)
-            mRedButton.setBackgroundResource(R.drawable.red_aubie_tr);
+            mRedButton.setBackgroundResource(R.drawable.redaubie_tr);
         else if (button == mYellowButton)
-            mYellowButton.setBackgroundResource(R.drawable.yellow_aubie_bl);
+            mYellowButton.setBackgroundResource(R.drawable.yellowaubie_bl);
         else if (button == mGreenButton)
-            mGreenButton.setBackgroundResource(R.drawable.green_aubie_br);
+            mGreenButton.setBackgroundResource(R.drawable.greenaubie_br);
     }
 
     private void unselect(ImageButton button) {
