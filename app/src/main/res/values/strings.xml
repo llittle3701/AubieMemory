@@ -10,6 +10,10 @@
     <string name="too_bad">"Too bad. Better luck next time."</string>
     <string name="play_again">"Play again"</string>
 
+    <string name="watch_closely">Watch closely&#8230;</string>
+    <string name="repeat_sequence">Now repeat the sequence.</string>
+    <string name="well_done">Well done.</string>
+
 
 
 </resources>

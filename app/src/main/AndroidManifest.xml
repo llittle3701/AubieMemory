@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="termproject18.lbl0013.comp3710.csse.eng.auburn.edu.aubiememory">
+    package="edu.auburn.eng.csse.comp3710.spring2018.termprojectpioneers">
 
     <application
         android:allowBackup="true"
@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SplashScreen"
+        <activity android:name="edu.auburn.eng.csse.comp3710.spring2018.termprojectpioneers.SplashScreen"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,7 +17,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MemoryActivity"></activity>
+        <activity
+            android:name="edu.auburn.eng.csse.comp3710.spring2018.termprojectpioneers.MemoryActivity">
+        </activity>
     </application>
 
 </manifest>

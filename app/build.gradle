@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "termproject18.lbl0013.comp3710.csse.eng.auburn.edu.aubiememory"
+        applicationId "edu.auburn.eng.csse.comp3710.spring2018.termprojectpioneers"
         minSdkVersion 24
         targetSdkVersion 27
         versionCode 1
