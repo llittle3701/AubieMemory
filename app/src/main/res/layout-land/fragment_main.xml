@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@color/offwhite">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_weight="1">
+
+        <Button
+            android:id="@+id/beginner_button"
+            android:layout_width="200dp"
+            android:layout_height="75dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/lightblue"
+            android:textStyle="bold"
+            android:text="@string/beginner_mode" />
+
+        <Button
+            android:id="@+id/intermediate_button"
+            android:layout_width="200dp"
+            android:layout_height="75dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/limegreen"
+            android:textStyle="bold"
+            android:text="@string/intermediate_mode" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_weight="1">
+        <Button
+            android:id="@+id/expert_button"
+            android:layout_width="200dp"
+            android:layout_height="75dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/red"
+            android:textStyle="bold"
+            android:text="@string/expert_mode" />
+
+        <Button
+            android:id="@+id/scores_button"
+            android:layout_width="200dp"
+            android:layout_height="75dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/orange"
+            android:textStyle="bold"
+            android:text="@string/high_scores" />
+    </LinearLayout>
+
+
+</LinearLayout>

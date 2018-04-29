@@ -32,9 +32,7 @@ public class GameFragment extends Fragment {
     ToneSequence mToneSequence;
     HighScoreManager mHighScoreManager;
     CountDownTimer mCountDownTimer;
-
     private int mScore;
-    private String scoreFile = "high_score.xml";
 
     private ImageButton mBlueButton;
     private ImageButton mRedButton;
@@ -52,7 +50,10 @@ public class GameFragment extends Fragment {
     private MediaPlayer mGreenNote;
     private MediaPlayer mVictorySound;
     private MediaPlayer mLoseSound;
+
     private boolean mArePlayersReleased = false;
+    private boolean isCPUPlaying = false;
+    private boolean hasPlayerLost = false;
 
     private TextView mScoreView;
     private TextView mHighScoreView;
@@ -64,9 +65,6 @@ public class GameFragment extends Fragment {
         View v  = inflater.inflate(R.layout.fragment_game, container, false);
 
         mToneSequence = new ToneSequence();
-        Context context = getContext();
-        if (context != null)
-            mHighScoreManager = new HighScoreManager(context);
 
         getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -85,9 +83,12 @@ public class GameFragment extends Fragment {
         mPurpleButton = v.findViewById(R.id.purple_button);
         mStartGameButton = v.findViewById(R.id.start_button);
 
-        enableButtons(false);
         setDifficulty(getArguments());
 
+        //Set high score
+        Context context = getContext();
+        if (context != null)
+            mHighScoreManager = new HighScoreManager(context);
         String highScore = mHighScoreManager.getHighScore(mCurrentDifficulty).toString();
         mHighScoreView.setText(highScore);
 
@@ -201,15 +202,53 @@ public class GameFragment extends Fragment {
             }
         });
 
-        //Wait some time, then play tone sequence for player
-        enableButtons(false);
 
-        mMessageView.setText("");
-        setScore(0);
-        mToneSequence.resetToneIndex();
-        mToneSequence.clear();
+        if (savedInstanceState != null) {
+            mToneSequence = savedInstanceState.getParcelable("ToneSequence");
+            mScore = savedInstanceState.getInt("Score");
+            isCPUPlaying = savedInstanceState.getBoolean("isCPUPlaying");
+            hasPlayerLost = savedInstanceState.getBoolean("hasPlayerLost");
+            setScore(mScore);
+            if (isCPUPlaying) {
+                mMessageView.setText(R.string.watch_closely);
+                enableButtons(false);
+                new Handler().postDelayed(new Runnable() {
+                    public void run() {
+                        computerPlayToneSequence();
+                    }
+                },TONE_LENGTH);
+            }
+            else {
+                if (hasPlayerLost) {
+                    enableButtons(false);
+                    mMessageView.setText(R.string.too_bad);
+                    //Display 'play again' button
+                    mStartGameButton.setVisibility(View.VISIBLE);
+                }
+                else {
+                    enableButtons(true);
+                    mMessageView.setText(R.string.repeat_sequence);
+                }
+            }
+        }
+        else {
 
-        new Handler().postDelayed(new Runnable(){public void run() { computerPlayToneSequence();}}, 2 * TONE_LENGTH);
+            mToneSequence = new ToneSequence();
+            //Wait some time, then play tone sequence for player
+            enableButtons(false);
+
+            mMessageView.setText("");
+            setScore(0);
+            mToneSequence.resetToneIndex();
+            mToneSequence.clear();
+
+            new Handler().postDelayed(new Runnable() {
+                public void run() {
+                    mToneSequence.addRandomTone();
+                    computerPlayToneSequence();
+                }
+            }, 2 * TONE_LENGTH);
+        }
 
         return v;
     }
@@ -340,8 +379,7 @@ public class GameFragment extends Fragment {
     // player to input the tones.
     private void computerPlayToneSequence() {
         mMessageView.setText(R.string.watch_closely);
-        //add a new tone to sequence
-        mToneSequence.addRandomTone();
+        isCPUPlaying = true;
 
         mCountDownTimer = new CountDownTimer(30000, TONE_LENGTH + TONE_INTERVAL) {
             public void onTick(long millisUntilFinished) {
@@ -360,6 +398,7 @@ public class GameFragment extends Fragment {
                 }
                 else {
                     mToneSequence.resetToneIndex();
+                    isCPUPlaying = false;
                     enableButtons(true);
                     mMessageView.setText(R.string.repeat_sequence);
                 }
@@ -379,7 +418,7 @@ public class GameFragment extends Fragment {
             mPinkButton.setEnabled(false);
             mLightBlueButton.setEnabled(false);
             mYellowButton.setEnabled(false);
-            mGreenButton.setEnabled(false);
+            mPurpleButton.setEnabled(false);
         } else {
             mBlueButton.setEnabled(true);
             mRedButton.setEnabled(true);
@@ -388,7 +427,7 @@ public class GameFragment extends Fragment {
             mPinkButton.setEnabled(true);
             mLightBlueButton.setEnabled(true);
             mYellowButton.setEnabled(true);
-            mGreenButton.setEnabled(true);
+            mPurpleButton.setEnabled(true);
         }
     }
 
@@ -397,6 +436,7 @@ public class GameFragment extends Fragment {
         if (!mToneSequence.isInputCorrect(color)) {
             //player chose wrong. Wait for selected tone to finish, then play lose sound.
             new Handler().postDelayed(new Runnable() { public void run() {mLoseSound.start();}}, TONE_LENGTH);
+            hasPlayerLost = true;
             mMessageView.setText(R.string.too_bad);
             //Display 'play again' button
             mStartGameButton.setVisibility(View.VISIBLE);
@@ -405,6 +445,7 @@ public class GameFragment extends Fragment {
         //has the player won the round?
         if (mToneSequence.isSequenceFinished()) {
             //player inputted sequence correctly. Wait for selected tone to finish, then play victory sound.
+            hasPlayerLost = false;
             mMessageView.setText(R.string.well_done);
             new Handler().postDelayed(new Runnable() { public void run() {mVictorySound.start();}}, TONE_LENGTH);
             enableButtons(false);
@@ -417,7 +458,9 @@ public class GameFragment extends Fragment {
                 mHighScoreView.setText(currentScore);
             }
             //Wait some time, then play new tone sequence for player
-            new Handler().postDelayed(new Runnable() { public void run() { computerPlayToneSequence();}}, 2 * TONE_LENGTH);
+            new Handler().postDelayed(new Runnable() { public void run() {
+                mToneSequence.addRandomTone();
+                computerPlayToneSequence();}}, 2 * TONE_LENGTH);
         }
     }
 
@@ -427,6 +470,31 @@ public class GameFragment extends Fragment {
         mScoreView.setText(currentScore);
     }
 
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelable("ToneSequence", mToneSequence);
+        savedInstanceState.putInt("Score", mScore);
+        savedInstanceState.putBoolean("isCPUPlaying", isCPUPlaying);
+        savedInstanceState.putBoolean("hasPlayerLost", hasPlayerLost);
+    }
+
+    @Override
+    public void onPause() {
+        if (isCPUPlaying) {
+            mCountDownTimer.cancel();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        if (isCPUPlaying) {
+            computerPlayToneSequence();
+        }
+        super.onResume();
+    }
 
     @Override
     public void onDestroy() {
@@ -444,4 +512,7 @@ public class GameFragment extends Fragment {
         mArePlayersReleased = true;
         super.onDestroy();
     }
+
+
+
 }

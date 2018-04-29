@@ -1,9 +1,12 @@
 package edu.auburn.eng.csse.comp3710.spring2018.termprojectpioneers;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ToneSequence {
+public class ToneSequence implements Parcelable {
 
     private ArrayList<Color> mToneSequence;
     private int mCurrentToneIndex;
@@ -62,4 +65,44 @@ public class ToneSequence {
     public boolean isToneLastInSequence() {
         return (mCurrentToneIndex == (getSize() - 1));
     }
+
+    protected ToneSequence(Parcel in) {
+        if (in.readByte() == 0x01) {
+            mToneSequence = new ArrayList<Color>();
+            in.readList(mToneSequence, Color.class.getClassLoader());
+        } else {
+            mToneSequence = null;
+        }
+        mCurrentToneIndex = in.readInt();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (mToneSequence == null) {
+            dest.writeByte((byte) (0x00));
+        } else {
+            dest.writeByte((byte) (0x01));
+            dest.writeList(mToneSequence);
+        }
+        dest.writeInt(mCurrentToneIndex);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<ToneSequence> CREATOR = new Parcelable.Creator<ToneSequence>() {
+        @Override
+        public ToneSequence createFromParcel(Parcel in) {
+            return new ToneSequence(in);
+        }
+
+        @Override
+        public ToneSequence[] newArray(int size) {
+            return new ToneSequence[size];
+        }
+    };
 }
+
