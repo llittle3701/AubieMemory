@@ -14,6 +14,9 @@
     <string name="repeat_sequence">Now repeat the sequence.</string>
     <string name="well_done">Well done.</string>
 
+    <string name="splash_member_names">By: Lane Little, Samantha Kelly, William Jackson</string>
+    <string name="course_name">Auburn University COMP3710 Spring 2018</string>
+
 
 
 </resources>

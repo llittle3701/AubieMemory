@@ -4,9 +4,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/aumemlauncher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/aumemlauncher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name="edu.auburn.eng.csse.comp3710.spring2018.termprojectpioneers.SplashScreen"
