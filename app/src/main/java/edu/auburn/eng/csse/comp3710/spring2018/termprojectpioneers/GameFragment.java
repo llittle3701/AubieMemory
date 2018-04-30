@@ -417,7 +417,7 @@ public class GameFragment extends Fragment {
             mGreenButton.setEnabled(false);
             mPinkButton.setEnabled(false);
             mLightBlueButton.setEnabled(false);
-            mYellowButton.setEnabled(false);
+            mOrangeButton.setEnabled(false);
             mPurpleButton.setEnabled(false);
         } else {
             mBlueButton.setEnabled(true);
@@ -426,7 +426,7 @@ public class GameFragment extends Fragment {
             mGreenButton.setEnabled(true);
             mPinkButton.setEnabled(true);
             mLightBlueButton.setEnabled(true);
-            mYellowButton.setEnabled(true);
+            mOrangeButton.setEnabled(true);
             mPurpleButton.setEnabled(true);
         }
     }
@@ -437,6 +437,7 @@ public class GameFragment extends Fragment {
             //player chose wrong. Wait for selected tone to finish, then play lose sound.
             new Handler().postDelayed(new Runnable() { public void run() {mLoseSound.start();}}, TONE_LENGTH);
             hasPlayerLost = true;
+            enableButtons(false);
             mMessageView.setText(R.string.too_bad);
             //Display 'play again' button
             mStartGameButton.setVisibility(View.VISIBLE);
