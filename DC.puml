@@ -1,0 +1,70 @@
+@startuml
+title AubieMemory Design Class Diagram
+
+class Player {
+mscore
+incrementScore()
+getScore()
+}
+
+class Game {
+-mBlueButton
+-mRedButton
+-mYellowButton
+-mGreenButton
+-mBlueNote
+-mRedNote
+-mYellowNote
+-mRedNote
+-mVictorySound
+-mLoseSound
+-mCountDownTimer
+setDifficulty()
+playTone()
+computerPlayTone()
+enableButtons()
+checkCorrectInput()
+setScore()
+onDestroy()
+}
+
+class MemoryActivity {
+onCreate()
+onPause()
+onResume()
+onAttach()
+onBeginnerButtonPressed()
+onIntermediateButtonPressed()
+onExpertButtonPressed()
+onScoreButtonPressed()
+}
+
+class HighScoreManager {
+getHighScore()
+setHighScore()
+}
+
+class ToneSequence {
+-mToneSequence
+-mCurrentToneIndex
+toneSequence()
+getNextTone()
+addRandomTone()
+getSize()
+getCurrentToneIndex()
+resetToneIndex()
+clear()
+isInputCorrect()
+isSequenceFinished()
+}
+
+object Activity
+object Fragment
+
+Player - Game
+Game -> Fragment
+Game - MemoryActivity
+Game - HighScoreManager
+Game - ToneSequence
+MemoryActivity -> Activity
+@enduml
