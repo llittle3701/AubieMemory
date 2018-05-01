@@ -486,10 +486,11 @@ public class GameFragment extends Fragment {
 
     @Override
     public void onResume() {
+        //Wait 3 seconds, then resume the sequence
         if (isCPUPlaying) {
             new Handler().postDelayed(new Runnable() { public void run() {
                 computerPlayToneSequence();}
-                }, 2 * TONE_LENGTH);
+                }, 3000);
         }
         super.onResume();
     }
