@@ -76,8 +76,8 @@ public class GameFragment extends Fragment {
         View v  = inflater.inflate(R.layout.fragment_game, container, false);
 
         mToneSequence = new ToneSequence();
-
         getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
 
         mScoreView = v.findViewById(R.id.score);
         mHighScoreView = v.findViewById(R.id.highscore);
