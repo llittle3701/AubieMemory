@@ -17,6 +17,8 @@
     <string name="splash_member_names">By: Lane Little, Samantha Kelly, William Jackson</string>
     <string name="course_name">Auburn University COMP3710 Spring 2018</string>
 
-
+    <string name="Sound">Sound</string>
+    <string name="sound_off">Sound Off</string>
+    <string name="sound_up">Sound Up</string>
 
 </resources>
