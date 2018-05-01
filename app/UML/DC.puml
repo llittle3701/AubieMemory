@@ -12,6 +12,10 @@ class Game {
 -mRedButton
 -mYellowButton
 -mGreenButton
+-mPinkButton
+-mLightBlueButton
+-mOrangeButton
+-mPurpleButton
 -mBlueNote
 -mRedNote
 -mYellowNote

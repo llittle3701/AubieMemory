@@ -6,9 +6,10 @@ actor Player
 rectangle {
 Player --> (choose difficulty)
 Player --> (view high scores)
-
-(choose difficulty) ..> (replicate sequence): <<includes>>
-(replicate sequence) ..> (view buttons): <<includes>>
-(replicate sequence) ..> (play tone): <<includes>>
+Player --> (play game)
+Player --> (mute audio)
+(play game) ..> (view buttons): <<includes>>
+(play game) ..> (replicate sequence): <<includes>>
+(replicate sequence) ..> (press button): <<includes>>
 }
 @enduml

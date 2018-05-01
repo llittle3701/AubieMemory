@@ -1,5 +1,5 @@
 @startuml
-title AubieMemory Doman Model
+title AubieMemory Domain Model
 
 class Player {
 score

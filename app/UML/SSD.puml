@@ -6,25 +6,26 @@ participant HighScoreManager
 group SD: Memory
 
 Player -> MemoryGame: Choose difficulty
-loop while (difficulty chosen)
-Player <-- MemoryGame: RedButton
-Player <-- MemoryGame: YellowButton
-Player <-- MemoryGame: GreenButton
-Player <-- MemoryGame: BlueButton
-Player <-- MemoryGame: PinkButton
-Player <-- MemoryGame: LightBlueButton
-Player <-- MemoryGame: OrangeButton
-Player <-- MemoryGame: PurpleButton
-else
-
-opt correct input
+Player <-- MemoryGame: display buttons
+loop while (game in progress)
+Player <-- MemoryGame: play tone sequence
 Player -> MemoryGame: input sequence
-Player <- MemoryGame: extended sequence
+
+alt correct input
+Player <- MemoryGame: extend sequence
+Player <-- MemoryGame: update score
+opt score > high score
+MemoryGame --> HighScoreManager: transmit High Score
+Player <-- MemoryGame: update high score
 end
+else incorrect input
+     Player <- MemoryGame: end game
+     Player <- MemoryGame: display 'play again' button
 end
 
-Player <-- MemoryGame: Score
-MemoryGame --> HighScoreManager: transmit High Score
-Player <-- HighScoreManager: view High Scores
+end
+
+Player -> MemoryGame: view high scores
+Player <-- HighScoreManager: show high scores
 end
 @enduml
