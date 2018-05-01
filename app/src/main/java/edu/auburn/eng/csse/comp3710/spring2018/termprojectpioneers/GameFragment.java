@@ -212,11 +212,6 @@ public class GameFragment extends Fragment {
             if (isCPUPlaying) {
                 mMessageView.setText(R.string.watch_closely);
                 enableButtons(false);
-                new Handler().postDelayed(new Runnable() {
-                    public void run() {
-                        computerPlayToneSequence();
-                    }
-                },TONE_LENGTH);
             }
             else {
                 if (hasPlayerLost) {
@@ -492,7 +487,9 @@ public class GameFragment extends Fragment {
     @Override
     public void onResume() {
         if (isCPUPlaying) {
-            computerPlayToneSequence();
+            new Handler().postDelayed(new Runnable() { public void run() {
+                computerPlayToneSequence();}
+                }, 2 * TONE_LENGTH);
         }
         super.onResume();
     }
