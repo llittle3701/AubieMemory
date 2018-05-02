@@ -7,7 +7,6 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,13 +16,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import java.io.IOException;
-
-import edu.auburn.eng.csse.comp3710.spring2018.termprojectpioneers.R;
 
 public class GameFragment extends Fragment {
-
-    private final String ERROR_TAG = "error";
 
     public enum Difficulty {BEGINNER, INTERMEDIATE, EXPERT}
     private String mCurrentDifficulty = "";
@@ -103,40 +97,24 @@ public class GameFragment extends Fragment {
         String highScore = mHighScoreManager.getHighScore(mCurrentDifficulty).toString();
         mHighScoreView.setText(highScore);
 
-        mBlueNote = MediaPlayer.create(getActivity(), R.raw.blue_long);
-        mBlueNote.setVolume(0.05f, 0.05f);
-        mRedNote = MediaPlayer.create(getActivity(), R.raw.red_long);
-        mRedNote.setVolume(0.05f, 0.05f);
-        mYellowNote = MediaPlayer.create(getActivity(), R.raw.yellow_long);
-        mYellowNote.setVolume(0.05f, 0.05f);
-        mGreenNote = MediaPlayer.create(getActivity(), R.raw.green_long);
-        mGreenNote.setVolume(0.05f, 0.05f);
-        mVictorySound = MediaPlayer.create(getActivity(), R.raw.victory);
-        mVictorySound.setVolume(0.05f, 0.05f);
-        mLoseSound = MediaPlayer.create(getActivity(), R.raw.lose);
-        mLoseSound.setVolume(0.05f, 0.05f);
+        setAudioSource(mBlueNote);
+        setAudioSource(mRedNote);
+        setAudioSource(mYellowNote);
+        setAudioSource(mGreenNote);
+        setAudioSource(mVictorySound);
+        setAudioSource(mLoseSound);
 
         mVictorySound.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             public void onCompletion(MediaPlayer mp) {
-                try {
-                    mp.stop();
-                    mp.prepare();
-                }
-                catch(IOException e){
-                    Log.e(ERROR_TAG, "IOException for victory or lose sound.");
-                }
+                mVictorySound.release();
+                mVictorySound = null;
             }
         });
 
         mLoseSound.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             public void onCompletion(MediaPlayer mp) {
-                try {
-                    mp.stop();
-                    mp.prepare();
-                }
-                catch(IOException e){
-                    Log.e(ERROR_TAG, "IOException for victory or lose sound.");
-                }
+                mLoseSound.release();
+                mLoseSound = null;
             }
         });
 
@@ -209,6 +187,7 @@ public class GameFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mStartGameButton.setVisibility(View.INVISIBLE);
+                hasPlayerLost = false;
                 getFragmentManager().beginTransaction().detach(GameFragment.this).attach(GameFragment.this).commit();
             }
         });
@@ -278,10 +257,42 @@ public class GameFragment extends Fragment {
         }
     }
 
+    private void setAudioSource(MediaPlayer player) {
+
+        if (player != null) {
+            player.release();
+        }
+
+        if (player == mBlueNote) {
+            mBlueNote = MediaPlayer.create(getActivity(), R.raw.blue_long);
+            mBlueNote.setVolume(0.05f, 0.05f);
+        }
+        else if (player == mRedNote) {
+            mRedNote = MediaPlayer.create(getActivity(), R.raw.red_long);
+            mRedNote.setVolume(0.05f, 0.05f);
+        }
+        else if (player == mYellowNote) {
+            mYellowNote = MediaPlayer.create(getActivity(), R.raw.yellow_long);
+            mYellowNote.setVolume(0.05f, 0.05f);
+        }
+        else if (player == mGreenNote) {
+            mGreenNote = MediaPlayer.create(getActivity(), R.raw.green_long);
+            mGreenNote.setVolume(0.05f, 0.05f);
+        }
+        else if (player == mVictorySound) {
+            mVictorySound = MediaPlayer.create(getActivity(), R.raw.victory);
+            mVictorySound.setVolume(0.05f, 0.05f);
+        }
+        else if (player == mLoseSound) {
+            mLoseSound = MediaPlayer.create(getActivity(), R.raw.lose);
+            mLoseSound.setVolume(0.05f, 0.05f);
+        }
+    }
+
     private void playTone(final ImageButton button, final MediaPlayer note,
                             final boolean isPlayerTurn) {
         final Boolean isLastInSequence = mToneSequence.isToneLastInSequence();
-        setSelected(button);
+        selectButton(button);
         enableButtons(false);
         //play for tone for its duration
         if (!mArePlayersReleased) {
@@ -292,28 +303,25 @@ public class GameFragment extends Fragment {
         }
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                try {
-                    if (!mArePlayersReleased) {
+                if (!mArePlayersReleased) {
+                    if (note.isPlaying())
                         note.stop();
-                        note.prepare();
-                    }
-                    unselect(button);
-                    if (isPlayerTurn) {
-                        if (isLastInSequence)
-                            enableButtons(false);
-                        else
-                            enableButtons(true);
+                    note.release();
+                    setAudioSource(note);
+                }
+                unselectButton(button);
+                if (isPlayerTurn) {
+                    if (isLastInSequence)
+                        enableButtons(false);
+                    else
+                        enableButtons(true);
                     }
                 }
-                catch(IOException e){
-                    Log.e(ERROR_TAG, "IOException for button.");
-                }
-            }
         }, TONE_LENGTH);
     }
 
 
-    private void setSelected(ImageButton button) {
+    private void selectButton(ImageButton button) {
         if (button == mBlueButton)
             mBlueButton.setBackgroundResource(R.drawable.blueaubie_tl);
         else if (button == mRedButton)
@@ -332,7 +340,7 @@ public class GameFragment extends Fragment {
             mPurpleButton.setBackgroundResource(R.drawable.purpleaubie_br);
     }
 
-    private void unselect(ImageButton button) {
+    private void unselectButton(ImageButton button) {
         if (button == mBlueButton)
             mBlueButton.setBackgroundResource(R.drawable.blue_tl);
         else if (button == mRedButton)
@@ -441,7 +449,9 @@ public class GameFragment extends Fragment {
         //is the inputted tone correct?
         if (!mToneSequence.isInputCorrect(color)) {
             //player chose wrong. Wait for selected tone to finish, then play lose sound.
-            new Handler().postDelayed(new Runnable() { public void run() {mLoseSound.start();}}, TONE_LENGTH);
+            new Handler().postDelayed(new Runnable() { public void run() {
+                setAudioSource(mLoseSound);
+                mLoseSound.start();}}, TONE_LENGTH);
             hasPlayerLost = true;
             enableButtons(false);
             mMessageView.setText(R.string.too_bad);
@@ -454,7 +464,9 @@ public class GameFragment extends Fragment {
             //player inputted sequence correctly. Wait for selected tone to finish, then play victory sound.
             hasPlayerLost = false;
             mMessageView.setText(R.string.well_done);
-            new Handler().postDelayed(new Runnable() { public void run() {mVictorySound.start();}}, TONE_LENGTH);
+            new Handler().postDelayed(new Runnable() { public void run() {
+                setAudioSource(mVictorySound);
+                mVictorySound.start();}}, TONE_LENGTH);
             enableButtons(false);
             mToneSequence.resetToneIndex();
 
@@ -476,7 +488,6 @@ public class GameFragment extends Fragment {
         String currentScore = score.toString();
         mScoreView.setText(currentScore);
     }
-
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -508,13 +519,20 @@ public class GameFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        if (mCountDownTimer != null) {
+        if (mCountDownTimer != null)
             mCountDownTimer.cancel();
-        }
         mBlueNote.stop();
         mRedNote.stop();
         mYellowNote.stop();
         mGreenNote.stop();
+        if (mVictorySound != null) {
+            mVictorySound.stop();
+            mVictorySound.release();
+        }
+        if (mLoseSound != null){
+            mLoseSound.stop();
+            mLoseSound.release();
+        }
         mBlueNote.release();
         mRedNote.release();
         mYellowNote.release();
@@ -535,8 +553,8 @@ public class GameFragment extends Fragment {
             case R.id.sound_off:
                 mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
                 return true;
-            case R.id.sound_up:
-                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
+            case R.id.sound_on:
+                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

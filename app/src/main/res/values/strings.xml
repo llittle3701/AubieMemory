@@ -19,6 +19,6 @@
 
     <string name="Sound">Sound</string>
     <string name="sound_off">Sound Off</string>
-    <string name="sound_up">Sound Up</string>
+    <string name="sound_on">Sound On</string>
 
 </resources>

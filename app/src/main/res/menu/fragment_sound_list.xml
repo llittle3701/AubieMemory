@@ -9,8 +9,8 @@
         app:showAsAction="ifRoom|withText" />
 
     <item
-        android:id="@+id/sound_up"
+        android:id="@+id/sound_on"
         android:icon="@android:drawable/ic_lock_silent_mode_off"
-        android:title="@string/sound_up"
+        android:title="@string/sound_on"
         app:showAsAction="ifRoom|withText" />
 </menu>

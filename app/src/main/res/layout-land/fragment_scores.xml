@@ -18,71 +18,65 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical|center_horizontal"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/beginner_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="236dp"
-        android:layout_marginTop="32dp"
-        android:text="@string/beginner_mode"
-        android:textColor="@color/lightblue"
-        android:textSize="30sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/beginner_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="296dp"
-        android:layout_marginTop="8dp"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/beginner_textview" />
+        <TextView
+            android:id="@+id/beginner_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="@string/beginner_mode"
+            android:textColor="@color/lightblue"
+            android:textSize="24sp" />
 
-    <TextView
-        android:id="@+id/intermediate_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="212dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/intermediate_mode"
-        android:textColor="@color/limegreen"
-        android:textSize="30sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/beginner_score" />
+        <TextView
+            android:id="@+id/beginner_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:textSize="24sp" />
 
-    <TextView
-        android:id="@+id/intermediate_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="296dp"
-        android:layout_marginTop="8dp"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/intermediate_textview" />
+        <TextView
+            android:id="@+id/intermediate_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/intermediate_mode"
+            android:textColor="@color/limegreen"
+            android:textSize="24sp" />
 
-    <TextView
-        android:id="@+id/expert_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="254dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/expert_mode"
-        android:textColor="@color/red"
-        android:textSize="30sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/intermediate_score" />
+        <TextView
+            android:id="@+id/intermediate_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:textSize="24sp" />
 
-    <TextView
-        android:id="@+id/expert_score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="296dp"
-        android:layout_marginTop="8dp"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/expert_textview" />
+        <TextView
+            android:id="@+id/expert_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/expert_mode"
+            android:textColor="@color/red"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/expert_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textSize="24sp" />
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

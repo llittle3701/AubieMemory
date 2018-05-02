@@ -24,12 +24,14 @@ class Game {
 -mLoseSound
 -mCountDownTimer
 setDifficulty()
+setAudioSource()
+selectButton()
+unselectButton()
 playTone()
 computerPlayTone()
 enableButtons()
 checkCorrectInput()
 setScore()
-onDestroy()
 }
 
 class MemoryActivity {
